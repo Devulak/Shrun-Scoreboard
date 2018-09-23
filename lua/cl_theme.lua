@@ -34,21 +34,42 @@ end
 
 // Overwrite global fonts for shrun
 if CLIENT then
-	// - hud description font tags
+	// hud description font tags
 	surface.CreateFont("Description", {
-			font = "Open Sans",
-			size = .9*shrun.theme.rem,
-			weight = 400,
-			antialias = true,
+		font = "Open Sans",
+		size = .9*shrun.theme.rem,
+		weight = 400,
+		antialias = true,
 	})
 
-	// - chat font
+	// chat font
 	surface.CreateFont("ChatFont", {
-			font = "Open Sans",
-			size = 1.25*shrun.theme.rem,
-			weight = 700,
-			antialias = true,
+		font = "Open Sans",
+		size = 1.25*shrun.theme.rem,
+		weight = 700,
+		antialias = true,
+	})
+
+	surface.CreateFont("FontTitle", {
+		font = "Open Sans",
+		size = 2.25*shrun.theme.rem,
+		weight = 300,
+		antialias = true,
+	})
+
+	surface.CreateFont("FontHeader", {
+		font = "Open Sans",
+		size = 1.375*shrun.theme.rem,
+		weight = 300,
+		antialias = true,
+	})
+
+	surface.CreateFont("FontSub", {
+		font = "Open Sans",
+		size = shrun.theme.rem,
+		weight = 700,
+		antialias = true,
 	})
 end
 
-print("shrun theme initialization complete")
+print("shrun theme initialization complete");
