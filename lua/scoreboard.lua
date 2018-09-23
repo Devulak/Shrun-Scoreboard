@@ -249,20 +249,22 @@ function scoreboard:init()
 			end
 		end
 
-		playerPanel.Time = playerPanel:Add("DLabel");
-		playerPanel.Time:Dock(RIGHT);
-		playerPanel.Time:SetWidth(100);
-		playerPanel.Time:SetFont("FontHeader");
-		playerPanel.Time:SetTextColor(shrun.theme.txt);
-		playerPanel.Time:SetContentAlignment(5);
-		playerPanel.Time:SetText("");
-		playerPanel.Time.Paint = function(self)
-			if not playerPanel.player then return end
-			if evolve then // is evolve installed?
-				self.PlayTime = evolve:Time() - ply:GetNWInt("EV_JoinTime") + ply:GetNWInt("EV_PlayTime");
-				if self.NumPlayTime == nil or self.NumPlayTime != self.PlayTime then
-					self.NumPlayTime = self.PlayTime;
-					self:SetText(scoreboard:FormatTime(self.NumPlayTime) .. " " .. scoreboard:FormatTime(self.NumPlayTime, true));
+		if evolve then
+			playerPanel.Time = playerPanel:Add("DLabel");
+			playerPanel.Time:Dock(RIGHT);
+			playerPanel.Time:SetWidth(100);
+			playerPanel.Time:SetFont("FontHeader");
+			playerPanel.Time:SetTextColor(shrun.theme.txt);
+			playerPanel.Time:SetContentAlignment(5);
+			playerPanel.Time:SetText("");
+			playerPanel.Time.Paint = function(self)
+				if not playerPanel.player then return end
+				if evolve then // is evolve installed?
+					self.PlayTime = evolve:Time() - ply:GetNWInt("EV_JoinTime") + ply:GetNWInt("EV_PlayTime");
+					if self.NumPlayTime == nil or self.NumPlayTime != self.PlayTime then
+						self.NumPlayTime = self.PlayTime;
+						self:SetText(scoreboard:FormatTime(self.NumPlayTime) .. " " .. scoreboard:FormatTime(self.NumPlayTime, true));
+					end
 				end
 			end
 		end
