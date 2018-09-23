@@ -333,48 +333,6 @@ function scoreboard:HUDDrawScoreBoard()
 			table.insert(self.Window.PlayerScroll.PlayerPanels, playerPanel);
 		end 
 	end
-
-	// Playerlist
-	/*if playerAmount != #player.GetAll() then
-
-		playerAmount = #player.GetAll()
-
-		local playerInfo = {}
-		for _, v in pairs( player.GetAll() ) do
-			table.insert( playerInfo, { Player = v, Nick = v:Nick(), Usergroup = v:EV_GetRank(), Frags = v:Frags(), Deaths = v:Deaths(), Ping = v:Ping(), PlayTime = evolve:Time() - v:GetNWInt( "EV_JoinTime" ) + v:GetNWInt( "EV_PlayTime" )
-			, Propcount = v:GetNetworkedInt("Count.props") or 0
-			} )
-		end
-		table.SortByMember( playerInfo, "PlayTime" )
-
-		self.Window.PlayerScroll:Clear()
-
-		local spacing = 0
-
-		for k, v in pairs( playerInfo ) do
-
-			self.Window.PlayerPanel = vgui.Create( "DPanel", self.Window.PlayerScroll )
-			self.Window.PlayerPanel:SetSize( self.Window.PlayerScroll:GetWide(), rem(4) )
-			self.Window.PlayerPanel:SetPos( 0, spacing )
-			self.Window.PlayerPanel.Paint = function()
-
-				// Ranks
-				local col = evolve.ranks[ v.Usergroup ].Color
-
-				local textWidth, textHeight = self:QuickTextSize( "FontSub", evolve.ranks[ v.Usergroup ].Title )
-				draw.RoundedBox(3, rem(4+3), rem(3) - textHeight/2 - rem(.1), textWidth + rem(.5), textHeight + rem(.2), Color( col.r, col.g, col.b ) )
-				if ( col.r + col.g + col.b )/3 > 127 then
-					draw.SimpleText( evolve.ranks[ v.Usergroup ].Title, "FontSub", rem(4.25 + 3), rem(3), Color(0, 0, 0), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-				else
-					draw.SimpleText( evolve.ranks[ v.Usergroup ].Title, "FontSub", rem(4.25 + 3), rem(3), Color(255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-				end
-
-			end
-
-		end
-
-	end*/
-
 end
 
 function scoreboard:show()
