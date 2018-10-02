@@ -81,8 +81,8 @@ function scoreboard:init()
 
 	Window.Detail = vgui.Create("DPanel", Window);
 	Window.Detail:Dock(TOP);
-	Window.Detail:SetTall(rem(3));
 	Window.Detail.Paint = function(self, w, h)
+		self:SetTall(rem(3));
 		surface.SetDrawColor(shrun.theme.bgAlternative)
 		surface.DrawRect(0, 0, w, h);
 		draw.SimpleText("Currently playing " .. GAMEMODE.Name .. " on the map " .. game.GetMap() .. ", with " .. (#player.GetAll() >= 2 and (#player.GetAll() - 1) or "no") .. " other player" .. (#player.GetAll() != 2 and "s" or "") .. ".", "FontSub", w/2, h/2, shrun.theme.txtAlternative, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER);
@@ -95,6 +95,8 @@ function scoreboard:init()
 	Window.PlayerScroll.Spacer = rem(.125);
 	Window.PlayerScroll.PanelHeight = rem(4);
 	Window.PlayerScroll.Paint = function(self, w, h)
+		self.Spacer = rem(.125)
+		self.PanelHeight = rem(4)
 		self:SetTall(#self.PlayerPanels * (self.PanelHeight + self.Spacer));
 	end
 
@@ -102,8 +104,10 @@ function scoreboard:init()
 
 		local playerPanel = vgui.Create("DPanel", parent);
 		playerPanel:Dock(TOP);
-		playerPanel:SetTall(Window.PlayerScroll.PanelHeight + Window.PlayerScroll.Spacer);
 		playerPanel.Paint = function(self, w, h)
+
+			self:SetTall(Window.PlayerScroll.PanelHeight + Window.PlayerScroll.Spacer);
+
 			self:SetZPos((ply:Frags() * -50) + ply:Deaths())
 			surface.SetDrawColor(shrun.theme.red);
 			//surface.DrawRect(0, 0, w, h - Window.PlayerScroll.Spacer);
@@ -114,9 +118,11 @@ function scoreboard:init()
 
 		playerPanel.AvatarButton = playerPanel:Add("DButton");
 		playerPanel.AvatarButton:Dock(LEFT);
-		playerPanel.AvatarButton:DockMargin(rem(),rem(),rem(),rem());
-		playerPanel.AvatarButton:SetSize(rem(2), rem(2));
 		function playerPanel.AvatarButton:DoClick() // OnMousePressed
+
+			playerPanel.AvatarButton:DockMargin(rem(),rem(),rem(),rem());
+			playerPanel.AvatarButton:SetSize(rem(2), rem(2));
+
 			ply:ShowProfile()
 		end
 
@@ -127,10 +133,12 @@ function scoreboard:init()
 
 		playerPanel.Mute = playerPanel:Add("DImageButton");
 		playerPanel.Mute:Dock(RIGHT);
-		playerPanel.Mute:DockMargin(rem(),rem(),rem(),rem());
-		playerPanel.Mute:SetSize(rem(2), rem(2));
 		playerPanel.Mute.Paint = function(self, w, h)
 			if not playerPanel.player then return end
+
+			playerPanel.Mute:DockMargin(rem(),rem(),rem(),rem());
+			playerPanel.Mute:SetSize(rem(2), rem(2));
+
 			if self.Muted == nil or self.Muted != ply:IsMuted() then
 				self.Muted = ply:IsMuted();
 				if self.Muted then
@@ -146,17 +154,21 @@ function scoreboard:init()
 
 		playerPanel.NamePanel = playerPanel:Add("DPanel")
 		playerPanel.NamePanel:Dock(FILL);
-		playerPanel.NamePanel:DockMargin(0,rem(),0,rem());
 		playerPanel.NamePanel.Paint = function(self)
 			if not playerPanel.player then return end
+
+			playerPanel.NamePanel:DockMargin(0,rem(),0,rem());
+
 		end
 
 		playerPanel.NamePanel.Name = playerPanel.NamePanel:Add("DLabel")
 		playerPanel.NamePanel.Name:Dock(FILL);
 		playerPanel.NamePanel.Name:SetFont("FontHeader");
-		playerPanel.NamePanel.Name:SetTextColor(shrun.theme.txt);
 		playerPanel.NamePanel.Name.Paint = function(self)
 			if not playerPanel.player then return end
+
+			playerPanel.NamePanel.Name:SetTextColor(shrun.theme.txt);
+
 			self:SetText(ply:Nick());
 		end
 
@@ -288,11 +300,11 @@ function scoreboard:init()
 	end*/
 
 	// Footer
-	Window.Footer = vgui.Create("DPanel", Window)
-	Window.Footer:Dock(TOP);
-	Window.Footer.Paint = function( self, w, h )
+	Window.Bottom = vgui.Create("DPanel", Window)
+	Window.Bottom:Dock(TOP);
+	Window.Bottom.Paint = function( self, w, h )
 		self:SetTall(rem(3));
-		draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.bgAlternative);
+		draw.RoundedBox(shrun.theme.round, 0, -h, w, h * 2, shrun.theme.bgAlternative);
 	end
 
 
