@@ -192,10 +192,11 @@ function scoreboard:init()
 
 		playerPanel.FillPanel.Name = playerPanel.FillPanel:Add("DLabel")
 		playerPanel.FillPanel.Name:Dock(TOP);
-		playerPanel.FillPanel.Name:SetTall(rem());
 		playerPanel.FillPanel.Name:SetFont("FontHeader");
 		playerPanel.FillPanel.Name.Paint = function(self, w, h)
 			if not playerPanel.player then return end
+			
+			self:SetTall(rem());
 
 			// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.blue);
 
