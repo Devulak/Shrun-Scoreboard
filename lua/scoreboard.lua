@@ -63,41 +63,63 @@ function scoreboard:init()
 
 	Window:SetZPos(10);
 	Window:MakePopup();
-	Window:SetKeyboardInputEnabled( false );
+	Window:SetKeyboardInputEnabled(false);
+	Window:DockPadding(rem(),rem(),rem(),rem());
 	Window.Paint = function(self, w, h)
 		self:SetWide(rem(48));
 		self:InvalidateLayout(true);
 		self:SizeToChildren(false, true);
 		self:Center();
-		draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.bg);
+		draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.bgAlternative);
 	end
 
 	Window.Header = vgui.Create("DPanel", Window);
 	Window.Header:Dock(TOP);
 	Window.Header.Paint = function(self, w, h)
-		self:SetTall(rem(8.5));
-		draw.SimpleText(GetHostName(), "FontTitle", w/2, h/2, shrun.theme.txt, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER);
-	end
-
-	Window.Detail = vgui.Create("DPanel", Window);
-	Window.Detail:Dock(TOP);
-	Window.Detail.Paint = function(self, w, h)
-		self:SetTall(rem(3));
-		surface.SetDrawColor(shrun.theme.bgAlternative)
-		surface.DrawRect(0, 0, w, h);
-		draw.SimpleText("Currently playing " .. GAMEMODE.Name .. " on the map " .. game.GetMap() .. ", with " .. (#player.GetAll() >= 2 and (#player.GetAll() - 1) or "no") .. " other player" .. (#player.GetAll() != 2 and "s" or "") .. ".", "FontSub", w/2, h/2, shrun.theme.txtAlternative, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER);
+		self:SetTall(rem(6.5));
+		// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.bg);
+		draw.SimpleText(
+			GetHostName(), 
+			"FontTitle", 
+			w/2 + rem(.2), 
+			h/2 + rem(.2), 
+			shrun.theme.txt, 
+			TEXT_ALIGN_CENTER, 
+			TEXT_ALIGN_BOTTOM
+		);
+		draw.SimpleText(
+			"Currently playing " ..
+			GAMEMODE.Name ..
+			" on the map " ..
+			game.GetMap() ..
+			", with " ..
+			(#player.GetAll() >= 2 and (#player.GetAll() - 1) or "no") ..
+			" other player" ..
+			(#player.GetAll() != 2 and "s" or "") ..
+			".",
+			"FontSub", 
+			w/2 + rem(.2), 
+			h/2 + rem(.2), 
+			shrun.theme:Transparency(shrun.theme.txt, .25), 
+			TEXT_ALIGN_CENTER, 
+			TEXT_ALIGN_TOP
+		);
 	end
 
 	// PlayerScroll
 	Window.PlayerScroll = vgui.Create("DScrollPanel", Window)
 	Window.PlayerScroll:Dock(TOP);
 	Window.PlayerScroll.PlayerPanels = {};
-	Window.PlayerScroll.Spacer = rem(.125);
-	Window.PlayerScroll.PanelHeight = rem(4);
 	Window.PlayerScroll.Paint = function(self, w, h)
-		self.Spacer = rem(.125)
-		self.PanelHeight = rem(4)
-		self:SetTall(#self.PlayerPanels * (self.PanelHeight + self.Spacer));
+		// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.blue);
+
+		local playerTall = #self.PlayerPanels * (self.PlayerPanels[1]:GetTall() + rem());
+
+		if playerTall + Window.Header:GetTall() + rem(2) >= ScrH() - rem(2) then
+			self:SetTall(self:GetTall() - (Window:GetTall() - ScrH() + rem(2)));
+		else
+			self:SetTall(#self.PlayerPanels * (self.PlayerPanels[1]:GetTall() + rem()));
+		end
 	end
 
 	function scoreboard:createPlayerPanel(parent, ply)
@@ -105,24 +127,32 @@ function scoreboard:init()
 		local playerPanel = vgui.Create("DPanel", parent);
 		playerPanel:Dock(TOP);
 		playerPanel.Paint = function(self, w, h)
+			playerPanel:DockMargin(0, rem(), 0, 0);
+			playerPanel:DockPadding(rem(), rem(), rem(), rem());
+			playerPanel:SetTall(rem(4));
 
-			self:SetTall(Window.PlayerScroll.PanelHeight + Window.PlayerScroll.Spacer);
+			self:SetZPos((ply:Frags() * -50) + ply:Deaths());
 
-			self:SetZPos((ply:Frags() * -50) + ply:Deaths())
-			surface.SetDrawColor(shrun.theme.red);
-			//surface.DrawRect(0, 0, w, h - Window.PlayerScroll.Spacer);
-			surface.SetDrawColor(shrun.theme.bgAlternative);
-			surface.DrawRect(0, h - Window.PlayerScroll.Spacer, w, Window.PlayerScroll.Spacer);
+			local lineColour = shrun.theme.bg;
+			if ply:IsSuperAdmin() then
+				lineColour = shrun.theme.red;
+			elseif ply:IsAdmin() then
+				lineColour = shrun.theme.yellow;
+			end
+
+			draw.RoundedBox(shrun.theme.round, 0, 0, w, h, lineColour);
+
+			draw.RoundedBox(shrun.theme.round - 1, 1, 1, w - 2, h - 2, shrun.theme.bg);
 		end
 		playerPanel.player = ply;
 
 		playerPanel.AvatarButton = playerPanel:Add("DButton");
 		playerPanel.AvatarButton:Dock(LEFT);
-		function playerPanel.AvatarButton:DoClick() // OnMousePressed
-
-			playerPanel.AvatarButton:DockMargin(rem(),rem(),rem(),rem());
+		playerPanel.AvatarButton.Paint = function(self, w, h)
+			playerPanel.AvatarButton:DockMargin(0, 0, rem(), 0);
 			playerPanel.AvatarButton:SetSize(rem(2), rem(2));
-
+		end
+		function playerPanel.AvatarButton:DoClick() // OnMousePressed
 			ply:ShowProfile()
 		end
 
@@ -136,7 +166,7 @@ function scoreboard:init()
 		playerPanel.Mute.Paint = function(self, w, h)
 			if not playerPanel.player then return end
 
-			playerPanel.Mute:DockMargin(rem(),rem(),rem(),rem());
+			playerPanel.Mute:DockMargin(rem(), 0, 0, 0);
 			playerPanel.Mute:SetSize(rem(2), rem(2));
 
 			if self.Muted == nil or self.Muted != ply:IsMuted() then
@@ -152,40 +182,49 @@ function scoreboard:init()
 			end
 		end
 
-		playerPanel.NamePanel = playerPanel:Add("DPanel")
-		playerPanel.NamePanel:Dock(FILL);
-		playerPanel.NamePanel.Paint = function(self)
+		playerPanel.FillPanel = playerPanel:Add("DPanel");
+		playerPanel.FillPanel:Dock(FILL);
+		playerPanel.FillPanel.Paint = function(self, w, h)
 			if not playerPanel.player then return end
 
-			playerPanel.NamePanel:DockMargin(0,rem(),0,rem());
-
+			// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.red);
 		end
 
-		playerPanel.NamePanel.Name = playerPanel.NamePanel:Add("DLabel")
-		playerPanel.NamePanel.Name:Dock(FILL);
-		playerPanel.NamePanel.Name:SetFont("FontHeader");
-		playerPanel.NamePanel.Name.Paint = function(self)
+		playerPanel.FillPanel.Name = playerPanel.FillPanel:Add("DLabel")
+		playerPanel.FillPanel.Name:Dock(TOP);
+		playerPanel.FillPanel.Name:SetTall(rem());
+		playerPanel.FillPanel.Name:SetFont("FontHeader");
+		playerPanel.FillPanel.Name.Paint = function(self, w, h)
 			if not playerPanel.player then return end
 
-			playerPanel.NamePanel.Name:SetTextColor(shrun.theme.txt);
+			// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.blue);
 
+			playerPanel.FillPanel.Name:SetTextColor(shrun.theme.txt);
 			self:SetText(ply:Nick());
 		end
 
+		playerPanel.FillPanel.Tags = playerPanel.FillPanel:Add("DPanel")
+		playerPanel.FillPanel.Tags:Dock(FILL);
+		playerPanel.FillPanel.Tags.Paint = function(self, w, h)
+			if not playerPanel.player then return end
+		end
+
 		if evolve or ply:IsAdmin() then
-			playerPanel.NamePanel.Rank = playerPanel.NamePanel:Add("DLabel");
-			playerPanel.NamePanel.Rank:Dock(BOTTOM);
-			playerPanel.NamePanel.Rank:SetFont("FontSub");
-			playerPanel.NamePanel.Rank:SetTextColor(shrun.theme.AlternativeTxt);
-			playerPanel.NamePanel.Rank.Paint = function(self, w, h)
+			playerPanel.FillPanel.Tags.Rank = playerPanel.FillPanel.Tags:Add("DLabel");
+			playerPanel.FillPanel.Tags.Rank:Dock(LEFT);
+			playerPanel.FillPanel.Tags.Rank:SetFont("FontSubBold");
+			playerPanel.FillPanel.Tags.Rank:SetTextColor(shrun.theme.AlternativeTxt);
+			playerPanel.FillPanel.Tags.Rank.Paint = function(self, w, h)
 				if not playerPanel.player then return end
+
+				self:DockMargin(0,0,rem(.25),0);
 
 				if evolve then
 					local usergroup = ply:EV_GetRank()
 					local bgCol = evolve.ranks[ usergroup ].Color;
-					local textWidth, textHeight = scoreboard:QuickTextSize("FontSub", evolve.ranks[usergroup].Title);
+					local textWidth = scoreboard:QuickTextSize("FontSub", evolve.ranks[usergroup].Title);
 
-					if (bgCol.r + bgCol.g + bgCol.b)/3 > 127 then
+					if (bgCol.r + bgCol.g + bgCol.b)/3 > 155 then
 						self:SetTextColor(Color(0, 0, 0));
 					else
 						self:SetTextColor(Color(255, 255, 255));
@@ -194,7 +233,7 @@ function scoreboard:init()
 					self:SetWide(textWidth + rem())
 					self:SetContentAlignment(5);
 
-					draw.RoundedBox(shrun.theme.round, 0, 0, self:GetWide(), h, Color(bgCol.r, bgCol.g, bgCol.b));
+					draw.RoundedBox(shrun.theme.round, 0, 0, w, h, Color(bgCol.r, bgCol.g, bgCol.b));
 
 					self:SetText(evolve.ranks[usergroup].Title);
 				elseif ply:IsSuperAdmin() then
@@ -205,80 +244,19 @@ function scoreboard:init()
 			end
 		end
 
-		playerPanel.Ping = playerPanel:Add("DLabel");
-		playerPanel.Ping:Dock(RIGHT);
-		playerPanel.Ping:SetWidth(50);
-		playerPanel.Ping:SetFont("FontHeader");
-		playerPanel.Ping:SetTextColor(shrun.theme.txt);
-		playerPanel.Ping:SetContentAlignment(5);
-		playerPanel.Ping.Paint = function(self)
-			if not playerPanel.player then return end
-			if self.NumPing == nil or self.NumPing != ply:Ping() then
-				self.NumPing = ply:Ping();
-				self:SetText(self.NumPing);
-			end
-		end
+		scoreboard:CreateBoxStatus(playerPanel, "LATENCY", function() return ply:Ping() or 0 .. " ms"; end);
+		scoreboard:CreateBoxStatus(playerPanel, "PROPS", function() return ply:GetNetworkedInt("Count.props") or 0 end);
+		scoreboard:CreateBoxStatus(playerPanel, "DEATHS", function() return ply:Deaths() or 0; end);
+		scoreboard:CreateBoxStatus(playerPanel, "FRAGS", function() return ply:Frags() or 0; end);
 
-		playerPanel.Props = playerPanel:Add("DLabel");
-		playerPanel.Props:Dock(RIGHT);
-		playerPanel.Props:SetWidth(50);
-		playerPanel.Props:SetFont("FontHeader");
-		playerPanel.Props:SetTextColor(shrun.theme.txt);
-		playerPanel.Props:SetContentAlignment(5);
-		playerPanel.Props.Paint = function(self)
-			if not playerPanel.player then return end
-			if self.NumProps == nil or self.NumProps != (ply:GetNetworkedInt("Count.props") or 0) then
-				self.NumProps = ply:GetNetworkedInt("Count.props") or 0;
-				self:SetText(self.NumProps);
-			end
-		end
-
-		playerPanel.Deaths = playerPanel:Add("DLabel");
-		playerPanel.Deaths:Dock(RIGHT);
-		playerPanel.Deaths:SetWidth(50);
-		playerPanel.Deaths:SetFont("FontHeader");
-		playerPanel.Deaths:SetTextColor(shrun.theme.txt);
-		playerPanel.Deaths:SetContentAlignment(5);
-		playerPanel.Deaths.Paint = function(self)
-			if not playerPanel.player then return end
-			if self.NumDeaths == nil or self.NumDeaths != ply:Deaths() then
-				self.NumDeaths = ply:Deaths();
-				self:SetText(self.NumDeaths);
-			end
-		end
-
-		playerPanel.Frags = playerPanel:Add("DLabel");
-		playerPanel.Frags:Dock(RIGHT);
-		playerPanel.Frags:SetWidth(50);
-		playerPanel.Frags:SetFont("FontHeader");
-		playerPanel.Frags:SetTextColor(shrun.theme.txt);
-		playerPanel.Frags:SetContentAlignment(5);
-		playerPanel.Frags.Paint = function(self)
-			if not playerPanel.player then return end
-			if self.NumFrags == nil or self.NumFrags != ply:Frags() then
-				self.NumFrags = ply:Frags();
-				self:SetText(self.NumFrags);
-			end
-		end
-
-		if evolve then
-			playerPanel.Time = playerPanel:Add("DLabel");
-			playerPanel.Time:Dock(RIGHT);
-			playerPanel.Time:SetWidth(100);
-			playerPanel.Time:SetFont("FontHeader");
-			playerPanel.Time:SetTextColor(shrun.theme.txt);
-			playerPanel.Time:SetContentAlignment(5);
-			playerPanel.Time:SetText("");
-			playerPanel.Time.Paint = function(self)
-				if not playerPanel.player then return end
-				if evolve then // is evolve installed?
-					self.PlayTime = evolve:Time() - ply:GetNWInt("EV_JoinTime") + ply:GetNWInt("EV_PlayTime");
-					if self.NumPlayTime == nil or self.NumPlayTime != self.PlayTime then
-						self.NumPlayTime = self.PlayTime;
-						self:SetText(scoreboard:FormatTime(self.NumPlayTime) .. " " .. scoreboard:FormatTime(self.NumPlayTime, true));
-					end
+		if evolve then // is evolve installed?
+			scoreboard:CreateBoxStatus(playerPanel, "PLAYTIME", function()
+				self.PlayTime = evolve:Time() - ply:GetNWInt("EV_JoinTime") + ply:GetNWInt("EV_PlayTime");
+				if self.NumPlayTime == nil or self.NumPlayTime != self.PlayTime then
+					self.NumPlayTime = self.PlayTime;
 				end
-			end
+				return scoreboard:FormatTime(self.NumPlayTime) .. " " .. scoreboard:FormatTime(self.NumPlayTime, true);
+			end);
 		end
 
 		return playerPanel;
@@ -299,18 +277,56 @@ function scoreboard:init()
 
 	end*/
 
-	// Footer
-	Window.Bottom = vgui.Create("DPanel", Window)
-	Window.Bottom:Dock(TOP);
-	Window.Bottom.Paint = function( self, w, h )
-		self:SetTall(rem(3));
-		draw.RoundedBox(shrun.theme.round, 0, -h, w, h * 2, shrun.theme.bgAlternative);
-	end
-
 
 	Window:Hide();
 
 	self.Window = Window;
+end
+
+function scoreboard:CreateBoxStatus(parent, text, value)
+	local BoxStatus = parent:Add("DPanel");
+	BoxStatus:Dock(RIGHT);
+	BoxStatus.Paint = function(self, w, h)
+		if not parent.player then return end
+
+		self:DockMargin(rem(), 0, 0, 0);
+
+		val = value();
+
+		textWidth = scoreboard:QuickTextSize("FontSubBold", text);
+
+		valWidth = scoreboard:QuickTextSize("FontSubBold", val);
+
+		if valWidth > textWidth then
+			self:SetWidth(valWidth);
+		else
+			self:SetWidth(textWidth);
+		end
+
+		// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.blue);
+
+		draw.SimpleText(
+			text,
+			"FontSubBold", 
+			w/2, 
+			h/2, 
+			shrun.theme:Transparency(shrun.theme.txt, .25),
+			TEXT_ALIGN_CENTER, 
+			TEXT_ALIGN_TOP
+		);
+
+		draw.SimpleText(
+			val,
+			"FontSubBold", 
+			w/2, 
+			h/2, 
+			shrun.theme.txt,
+			TEXT_ALIGN_CENTER, 
+			TEXT_ALIGN_BOTTOM
+		);
+	end
+
+	return BoxStatus;
 end
 
 
