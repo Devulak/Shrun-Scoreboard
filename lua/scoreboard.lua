@@ -32,7 +32,7 @@ end
 
 function scoreboard:FormatTime( seconds, showSecond )
 
-	local seconds = math.floor( seconds )
+	local seconds = math.floor(seconds)
 	local minutes = math.floor(seconds/60)
 	local hours = math.floor(minutes/60)
 	local time = 0
@@ -125,13 +125,18 @@ function scoreboard:init()
 	function scoreboard:createPlayerPanel(parent, ply)
 
 		local playerPanel = vgui.Create("DPanel", parent);
+		playerPanel.player = ply;
 		playerPanel:Dock(TOP);
 		playerPanel.Paint = function(self, w, h)
+			if not IsValid(ply) then return end
+
 			playerPanel:DockMargin(0, rem(), 0, 0);
 			playerPanel:DockPadding(rem(), rem(), rem(), rem());
 			playerPanel:SetTall(rem(4));
 
-			self:SetZPos((ply:Frags() * -50) + ply:Deaths());
+			local immunity = tonumber(evolve.ranks[(ply or LocalPlayer()):EV_GetRank()].Immunity);
+			local frags = ply:Frags();
+			self:SetZPos(- frags - immunity * 100);
 
 			local lineColour = shrun.theme.bg;
 			if ply:IsSuperAdmin() then
@@ -144,7 +149,6 @@ function scoreboard:init()
 
 			draw.RoundedBox(shrun.theme.round - 1, 1, 1, w - 2, h - 2, shrun.theme.bg);
 		end
-		playerPanel.player = ply;
 
 		playerPanel.AvatarButton = playerPanel:Add("DButton");
 		playerPanel.AvatarButton:Dock(LEFT);
@@ -164,7 +168,7 @@ function scoreboard:init()
 		playerPanel.Mute = playerPanel:Add("DImageButton");
 		playerPanel.Mute:Dock(RIGHT);
 		playerPanel.Mute.Paint = function(self, w, h)
-			if not playerPanel.player then return end
+			if not IsValid(ply) then return end
 
 			playerPanel.Mute:DockMargin(rem(), 0, 0, 0);
 			playerPanel.Mute:SetSize(rem(2), rem(2));
@@ -185,7 +189,7 @@ function scoreboard:init()
 		playerPanel.FillPanel = playerPanel:Add("DPanel");
 		playerPanel.FillPanel:Dock(FILL);
 		playerPanel.FillPanel.Paint = function(self, w, h)
-			if not playerPanel.player then return end
+			if not IsValid(ply) then return end
 
 			// draw.RoundedBox(shrun.theme.round, 0, 0, w, h, shrun.theme.red);
 		end
@@ -194,7 +198,7 @@ function scoreboard:init()
 		playerPanel.FillPanel.Name:Dock(TOP);
 		playerPanel.FillPanel.Name:SetFont("FontHeader");
 		playerPanel.FillPanel.Name.Paint = function(self, w, h)
-			if not playerPanel.player then return end
+			if not IsValid(ply) then return end
 			
 			self:SetTall(rem());
 
@@ -207,7 +211,7 @@ function scoreboard:init()
 		playerPanel.FillPanel.Tags = playerPanel.FillPanel:Add("DPanel")
 		playerPanel.FillPanel.Tags:Dock(FILL);
 		playerPanel.FillPanel.Tags.Paint = function(self, w, h)
-			if not playerPanel.player then return end
+			if not IsValid(ply) then return end
 		end
 
 		if evolve or ply:IsAdmin() then
@@ -216,13 +220,13 @@ function scoreboard:init()
 			playerPanel.FillPanel.Tags.Rank:SetFont("FontSubBold");
 			playerPanel.FillPanel.Tags.Rank:SetTextColor(shrun.theme.AlternativeTxt);
 			playerPanel.FillPanel.Tags.Rank.Paint = function(self, w, h)
-				if not playerPanel.player then return end
+			if not IsValid(ply) then return end
 
 				self:DockMargin(0,0,rem(.25),0);
 
 				if evolve then
 					local usergroup = ply:EV_GetRank()
-					local bgCol = evolve.ranks[ usergroup ].Color;
+					local bgCol = evolve.ranks[ usergroup ].Color or Color(255, 255, 100);
 					local textWidth = scoreboard:QuickTextSize("FontSub", evolve.ranks[usergroup].Title);
 
 					if (bgCol.r + bgCol.g + bgCol.b)/3 > 155 then
@@ -288,7 +292,7 @@ function scoreboard:CreateBoxStatus(parent, text, value)
 	local BoxStatus = parent:Add("DPanel");
 	BoxStatus:Dock(RIGHT);
 	BoxStatus.Paint = function(self, w, h)
-		if not parent.player then return end
+		if not IsValid(parent.player) then return end
 
 		self:DockMargin(rem(), 0, 0, 0);
 
