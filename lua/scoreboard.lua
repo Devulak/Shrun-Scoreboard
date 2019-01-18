@@ -271,6 +271,14 @@ function scoreboard:init()
 				end
 				return scoreboard:FormatTime(self.NumPlayTime) .. " " .. scoreboard:FormatTime(self.NumPlayTime, true);
 			end);
+		elseif ulx and ply:GetNWInt( "TotalUTime", -1 ) ~= -1 then
+			scoreboard:CreateBoxStatus(playerPanel, "PLAYTIME", function()
+				self.PlayTime = math.floor((ply:GetUTime() + CurTime() - ply:GetUTimeStart()));
+				if self.NumPlayTime == nil or self.NumPlayTime != self.PlayTime then
+					self.NumPlayTime = self.PlayTime;
+				end
+				return scoreboard:FormatTime(self.NumPlayTime) .. " " .. scoreboard:FormatTime(self.NumPlayTime, true);
+			end);
 		end
 
 		return playerPanel;
