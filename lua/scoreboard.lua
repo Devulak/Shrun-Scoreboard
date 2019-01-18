@@ -5,7 +5,7 @@ end
 
 local scoreboard = scoreboard or {};
 
-if SERVER then
+if SERVER and _R then
 	timer.Simple(1, function()
 		scoreboard.GetCount = _R.Player.GetCount
 		function _R.Player:GetCount(limit, minus)
@@ -134,7 +134,11 @@ function scoreboard:init()
 			playerPanel:DockPadding(rem(), rem(), rem(), rem());
 			playerPanel:SetTall(rem(4));
 
-			local immunity = tonumber(evolve.ranks[(ply or LocalPlayer()):EV_GetRank()].Immunity);
+			immunity = 0;
+			if evolve then
+				local immunity = tonumber(evolve.ranks[(ply or LocalPlayer()):EV_GetRank()].Immunity);
+			end
+
 			local frags = ply:Frags();
 			self:SetZPos(- frags - immunity * 100);
 
@@ -224,28 +228,33 @@ function scoreboard:init()
 
 				self:DockMargin(0,0,rem(.25),0);
 
+
+				local groupColour;
+				local groupName;
 				if evolve then
 					local usergroup = ply:EV_GetRank()
-					local bgCol = evolve.ranks[ usergroup ].Color or Color(255, 255, 100);
-					local textWidth = scoreboard:QuickTextSize("FontSub", evolve.ranks[usergroup].Title);
-
-					if (bgCol.r + bgCol.g + bgCol.b)/3 > 155 then
-						self:SetTextColor(Color(0, 0, 0));
-					else
-						self:SetTextColor(Color(255, 255, 255));
-					end
-
-					self:SetWide(textWidth + rem())
-					self:SetContentAlignment(5);
-
-					draw.RoundedBox(shrun.theme.round, 0, 0, w, h, Color(bgCol.r, bgCol.g, bgCol.b));
-
-					self:SetText(evolve.ranks[usergroup].Title);
-				elseif ply:IsSuperAdmin() then
-					self:SetText("Superadmin");
+					groupColour = evolve.ranks[usergroup].Color or Color(255, 255, 100);
+					groupName = evolve.ranks[usergroup].Title;
 				else
-					self:SetText("Admin");
+					local usergroup = ply:Team();
+					groupColour = team.GetColor(usergroup);
+					groupName = team.GetName(usergroup);
 				end
+				
+				local textWidth = scoreboard:QuickTextSize("FontSub", groupName);
+
+				if (groupColour.r + groupColour.g + groupColour.b)/3 > 155 then
+					self:SetTextColor(Color(0, 0, 0));
+				else
+					self:SetTextColor(Color(255, 255, 255));
+				end
+
+				self:SetWide(textWidth + rem())
+				self:SetContentAlignment(5);
+
+				draw.RoundedBox(shrun.theme.round, 0, 0, w, h, Color(groupColour.r, groupColour.g, groupColour.b));
+
+				self:SetText(groupName);
 			end
 		end
 
